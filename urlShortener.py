@@ -42,13 +42,13 @@ def get_root():
 @app.post("/save_url")
 def save_url(item:URL):
     if item.url in url_mapping:
-        return {"shortened_url":url_mapping[item.url]}
+        return {"shortened_url":url_mapping[item.url],"all_urls":url_mapping}
     url_mapping[item.url]=domain+generate_code()
-    print(url_mapping[item.url])
-    return {"shortened_url":url_mapping[item.url]}
+    print(url_mapping)
+    return {"shortened_url":url_mapping[item.url],"all_urls":url_mapping}
 
 @app.get("/{shortId}")
-def render_longURL(shortId:str):
+def render_longURL(shortId:str): 
     original_url=""
     for longurl,shorturl in url_mapping.items():
         if shorturl.endswith(shortId):
