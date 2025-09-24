@@ -3,20 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import sqlalchemy as db
-from sqlalchemy import Table
+from sqlalchemy import Table,insert,select
 
 import string
 import random
 
-engine = db.create_engine('mysql+pymysql://root:brp%402004@localhost:3306/employee')
+engine = db.create_engine('mysql+pymysql://root:brp%402004@localhost:3306/demoschema')
 metadata=db.MetaData()
-employee_info = Table('employee_info',metadata,autoload_with=engine)
-stmt = db.select(employee_info).where(employee_info.columns.salary==30000)
+url_table = Table('url_mapping',metadata,autoload_with=engine)
 
-with engine.connect() as conn:
-    results = conn.execute(stmt).fetchall()
-    for row in results:
-        print(row[1])
+
+
 
 app=FastAPI()
 app.add_middleware(
@@ -44,7 +41,17 @@ def save_url(item:URL):
     if item.url in url_mapping:
         return {"shortened_url":url_mapping[item.url],"all_urls":url_mapping}
     url_mapping[item.url]=domain+generate_code()
-    print(url_mapping)
+    code=generate_code()
+    stmt = insert(url_table).values(original_url=item.url,short_code=code)
+    stmt2 = select(url_table)
+
+    with engine.connect() as conn:
+        conn.execute(stmt)
+        conn.commit()
+        result = conn.execute(stmt2).fetchall()
+        for row in result:
+            print(row)
+    
     return {"shortened_url":url_mapping[item.url],"all_urls":url_mapping}
 
 @app.get("/{shortId}")
