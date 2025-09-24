@@ -1,22 +1,42 @@
-import logo from './logo.svg';
+import { useState } from "react";
 import './App.css';
 
 function App() {
+  const [url, setUrl] = useState("");
+  const [shortUrl,setShortUrl]=useState("")
+  const handleSubmit = () => {
+    
+
+    var link = 'http://127.0.0.1:8000/save_url';
+  fetch(link,{
+      method:'POST',
+      headers:{
+        'Accept':'application/json',
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({"url":url})
+    }).then((response)=>{
+      if(response.ok){
+        console.log("Created user")
+      }
+      return response.json();
+    }).then((data)=>{
+      setShortUrl(data["shortened_url"])
+    })
+    
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+         <div>
+          <label>Enter URL: </label>
+          <input type='text' value={url} onChange={(e)=>setUrl(e.target.value)} /><br/>
+
+          <button onClick={handleSubmit}>Submit</button><br></br>
+
+          <span>Shortened URL: </span><span id='shortUrl'>{shortUrl}</span>
+         </div>
       </header>
     </div>
   );
